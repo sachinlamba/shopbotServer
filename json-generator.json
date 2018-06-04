@@ -1,0 +1,71 @@
+[
+  '{{repeat(10, 20)}}',
+  {
+    
+    "_id": '{{index()}}',
+    "name": function (_id) {
+      return "Product " + _id.currentIndex;
+    },
+    "description": '{{lorem(1, "paragraphs")}}',
+    "category": function (feedback) {
+      var fruits = ['electronics', 'home product', 'sports'];
+      return fruits[feedback.integer(0, fruits.length - 1)];
+    },
+    "image_url": 'http://placehold.it/32x32',
+    "price": '{{floating(1000, 4000, 2, "$0,0.00")}}',
+    "feedback": [
+      '{{repeat(3)}}',      
+      {
+        "comment": '{{lorem(1, "words")}}',
+        "rating": '{{floating(0, 5)}}',
+        "user_name": '{{firstName()}} {{surname()}}',
+        "added_date": '{{date(new Date(2015, 0, 1), new Date(), "YYYY-MM-ddThh:mm:ss Z")}}'
+      }
+    ],
+    "deals": {
+      "isDeal": '{{bool()}}',
+      "deal_date": '{{date(new Date(2018, 0, 4), new Date(), "YYYY-MM-ddThh:mm:ss Z")}}',
+      "deal_name": '{{lorem(1, "words")}}',
+      "deal_discount": '{{floating(0, 70)}}'
+    },
+    "avg_rating": '{{floating(0, 5)}}'
+    // ,
+    // 
+    // _id: '{{objectId()}}',
+    // index: '{{index()}}',
+    // guid: '{{guid()}}',
+    // isActive: '{{bool()}}',
+    // balance: '{{floating(1000, 4000, 2, "$0,0.00")}}',
+    // picture: 'http://placehold.it/32x32',
+    // age: '{{integer(20, 40)}}',
+    // eyeColor: '{{random("blue", "brown", "green")}}',
+    // name: '{{firstName()}} {{surname()}}',
+    // gender: '{{gender()}}',
+    // company: '{{company().toUpperCase()}}',
+    // email: '{{email()}}',
+    // phone: '+1 {{phone()}}',
+    // address: '{{integer(100, 999)}} {{street()}}, {{city()}}, {{state()}}, {{integer(100, 10000)}}',
+    // about: '{{lorem(1, "paragraphs")}}',
+    // registered: '{{date(new Date(2014, 0, 1), new Date(), "YYYY-MM-ddThh:mm:ss Z")}}',
+    // latitude: '{{floating(-90.000001, 90)}}',
+    // longitude: '{{floating(-180.000001, 180)}}',
+    // tags: [
+    //   '{{repeat(7)}}',
+    //   '{{lorem(1, "words")}}'
+    // ],
+    // friends: [
+    //   '{{repeat(3)}}',
+    //   {
+    //     id: '{{index()}}',
+    //     name: '{{firstName()}} {{surname()}}'
+    //   }
+    // ],
+    // greeting: function (tags) {
+    //   return 'Hello, ' + this.name + '! You have ' + tags.integer(1, 10) + ' unread messages.';
+    // },
+    // favoriteFruit: function (tags) {
+    //   var fruits = ['apple', 'banana', 'strawberry'];
+    //   return fruits[tags.integer(0, fruits.length - 1)];
+    // }
+  }
+]
