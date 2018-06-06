@@ -14,7 +14,7 @@ const pass = nconf.get('mongoPass');
 const host = nconf.get('mongoHost');
 const port = nconf.get('mongoPort');
 const dbName = nconf.get('mongoDatabase');
-let serverHost = "6a225d68.ngrok.io";
+let serverHost = "445ff724.ngrok.io";
 if(process.env.PORT){//if webhook and app is runnig on heroku..
   serverHost = "shopbot-server.herokuapp.com";
 }
@@ -105,20 +105,31 @@ app.post('/shopbotServer', function (req, res){
               msg += "\n\n";
                 items_card.push(
                   {
-                    "description": "Price: "+ product.ListPrice,
-                    // "image": {
-                    //   "url": product.image_url,
-                    //   "accessibilityText": "product from category - " + product.category
-                    // },
-                    "optionInfo": {
-                      "key": String(index),
-                      "synonyms": [
-                        "thing " + String(index),
-                        "object " + String(index)
-                      ]
+                    "info": {
+                      "key": String(index)
                     },
-                    "title": product.Title
+                    "title": product.Title,
+                    "description": "Price: "+ product.ListPrice,
+                    "image": {
+                      "imageUri": "http:example.com",
+                      "accessibilityText": "example"
+                    }
                   }
+                  // {
+                  //   "description": "Price: "+ product.ListPrice,
+                  //   // "image": {
+                  //   //   "url": product.image_url,
+                  //   //   "accessibilityText": "product from category - " + product.category
+                  //   // },
+                  //   "optionInfo": {
+                  //     "key": String(index),
+                  //     "synonyms": [
+                  //       "thing " + String(index),
+                  //       "object " + String(index)
+                  //     ]
+                  //   },
+                  //   "title": product.Title
+                  // }
               )
               // }
             })
@@ -131,6 +142,11 @@ app.post('/shopbotServer', function (req, res){
                 "EANList": products_ean_list
               }
             })
+            // items_card.unshift({
+            //   "simpleResponse": {
+            //     "textToSpeech": "this is a simple product response for google"
+            //   }
+            // })
             res.setHeader('Content-Type', 'application/json');
             //done send data more than 640bytes(i think) else googlle assistent crash..
             // res.send(JSON.stringify({ 'speech': msg, 'displayText': msg, 'contextOut': contextOut,
@@ -146,6 +162,36 @@ app.post('/shopbotServer', function (req, res){
             let responseObj={
                  "fulfillmentText":response
                 ,"fulfillmentMessages":[
+                  {
+        "platform": "ACTIONS_ON_GOOGLE",
+        "carouselSelect": {
+          "items": items_card
+          // [
+          //   {
+          //     "info": {
+          //       "key": "1"
+          //     },
+          //     "title": "example1 carousel1111",
+          //     "description": "example1 carousel list",
+          //     "image": {
+          //       "imageUri": "http:example.com",
+          //       "accessibilityText": "example"
+          //     }
+          //   },
+          //   {
+          //     "info": {
+          //       "key": "2"
+          //     },
+          //     "title": "example1 carousel22222",
+          //     "description": "example1 carousel list 2",
+          //     "image": {
+          //       "imageUri": "http:example.com",
+          //       "accessibilityText": "example2"
+          //     }
+          //   }
+          // ]
+        }
+      },
                     {
                         "text": {
                             "text": [
@@ -155,6 +201,21 @@ app.post('/shopbotServer', function (req, res){
                     }
                 ]
                 ,"source":""
+                  // "payload": {
+                  //   "google": {
+                  //     "expectUserResponse": true,
+                  //     "richResponse": {
+                  //       "items"://items_card
+                  //       [
+                  //         {
+                  //           "simpleResponse": {
+                  //             "textToSpeech": "this is a simple product response for google"
+                  //           }
+                  //         },
+                  //       ]
+                  //     }
+                  //   }
+                  // }
             }
             return res.json(responseObj
               // JSON.stringify(
