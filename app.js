@@ -53,23 +53,6 @@ console.log('API server listening on port: 3000 or ', process.env.PORT)
 })
 
 app.post('/shopbotServer', function (req, res){
-//   let response = "This is a sample response from your webhook!";//Default response from the webhook to show it’s working
-// let responseObj={
-//      "fulfillmentText":response
-//     ,"fulfillmentMessages":[
-//         {
-//             "text": {
-//                 "text": [
-//                     "Hello I m Responding to intent"
-//                 ]
-//             }
-//         }
-//     ]
-//     ,"source":""
-// }
-// return res.json(responseObj);
-// })
-// app.post('/shopbotServer11', function (req, res){
   // let city = req.body.result.parameters['geo-city']; // city is a required param
   const intentName = req.body.queryResult.intent['displayName'],
         contexts = req.body.queryResult.outputContexts ? req.body.queryResult.outputContexts : [],
@@ -113,23 +96,11 @@ app.post('/shopbotServer', function (req, res){
                     "image": {
                       "imageUri": "http:example.com",
                       "accessibilityText": "example"
+                      // "imageUri": product.image_url,
+                      // "accessibilityText": "product from category - " + product.category
                     }
                   }
-                  // {
-                  //   "description": "Price: "+ product.ListPrice,
-                  //   // "image": {
-                  //   //   "url": product.image_url,
-                  //   //   "accessibilityText": "product from category - " + product.category
-                  //   // },
-                  //   "optionInfo": {
-                  //     "key": String(index),
-                  //     "synonyms": [
-                  //       "thing " + String(index),
-                  //       "object " + String(index)
-                  //     ]
-                  //   },
-                  //   "title": product.Title
-                  // }
+
               )
               // }
             })
@@ -142,11 +113,7 @@ app.post('/shopbotServer', function (req, res){
                 "EANList": products_ean_list
               }
             })
-            // items_card.unshift({
-            //   "simpleResponse": {
-            //     "textToSpeech": "this is a simple product response for google"
-            //   }
-            // })
+
             res.setHeader('Content-Type', 'application/json');
             //done send data more than 640bytes(i think) else googlle assistent crash..
             // res.send(JSON.stringify({ 'speech': msg, 'displayText': msg, 'contextOut': contextOut,
@@ -158,40 +125,16 @@ app.post('/shopbotServer', function (req, res){
             //                           }
             //                         ]
             //                      }));
-            let response = "This is a sample response from your webhook!";//Default response from the webhook to show it’s working
+            let response = "Here we have some tranding products: ";//Default response from the webhook to show it’s working
             let responseObj={
-                 "fulfillmentText":response
-                ,"fulfillmentMessages":[
-                  {
-        "platform": "ACTIONS_ON_GOOGLE",
-        "carouselSelect": {
-          "items": items_card
-          // [
-          //   {
-          //     "info": {
-          //       "key": "1"
-          //     },
-          //     "title": "example1 carousel1111",
-          //     "description": "example1 carousel list",
-          //     "image": {
-          //       "imageUri": "http:example.com",
-          //       "accessibilityText": "example"
-          //     }
-          //   },
-          //   {
-          //     "info": {
-          //       "key": "2"
-          //     },
-          //     "title": "example1 carousel22222",
-          //     "description": "example1 carousel list 2",
-          //     "image": {
-          //       "imageUri": "http:example.com",
-          //       "accessibilityText": "example2"
-          //     }
-          //   }
-          // ]
-        }
-      },
+                 "fulfillmentText":response,
+                 "fulfillmentMessages":[
+                    {
+                      "platform": "ACTIONS_ON_GOOGLE",
+                      "carouselSelect": {
+                        "items": items_card
+                      }
+                    },
                     {
                         "text": {
                             "text": [
@@ -217,67 +160,7 @@ app.post('/shopbotServer', function (req, res){
                   //   }
                   // }
             }
-            return res.json(responseObj
-              // JSON.stringify(
-              // {//'speech': msg, 'displayText': msg,
-              // "speech": "product list here", "displayText": "product list here",
-              //   "fulfillmentText": "This is a text response",
-              //   "fulfillmentMessages": [
-              //     {
-              //       "card": {
-              //         "title": "card title",
-              //         "subtitle": "card text",
-              //         "imageUri": "https://assistant.google.com/static/images/molecule/Molecule-Formation-stop.png",
-              //         "buttons": [
-              //           {
-              //             "text": "button text",
-              //             "postback": "https://assistant.google.com/"
-              //           }
-              //         ]
-              //       }
-              //     }
-              //   ],
-              //   "source": "example.com",
-              //   "payload": {
-              //     "google": {
-              //       "expectUserResponse": true,
-              //       "richResponse": {
-              //         "items": [
-              //           {
-              //             "simpleResponse": {
-              //               "textToSpeech": "this is a simple response"
-              //             }
-              //           }
-              //         ]
-              //       }
-              //     },
-              //     "facebook": {
-              //       "text": "Hello, Facebook!"
-              //     },
-              //     "slack": {
-              //       "text": "This is a text response for Slack."
-              //     }
-              //   },
-              //   "outputContexts": [
-              //     {
-              //       "name": "projects/${PROJECT_ID}/agent/sessions/${SESSION_ID}/contexts/context name",
-              //       "lifespanCount": 5,
-              //       "parameters": {
-              //         "param": "param value"
-              //       }
-              //     }
-              //   ],
-              //   "followupEventInput": {
-              //     // "name": "event name",
-              //     // "languageCode": "en-US",
-              //     // "parameters": {
-              //     //   "param": "param value"
-              //     // }
-              //   }
-              // }
-            // )
-            )
-
+            return res.json(responseObj)
         }).catch((error) => {
             // If there is an error let the user know
             res.setHeader('Content-Type', 'application/json');
