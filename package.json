@@ -1,7 +1,7 @@
 {
-  "name": "makerlab",
+  "name": "shotbotServer",
   "version": "1.0.0",
-  "description": "maker lab for client",
+  "description": "shoping bot for users",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
