@@ -14,25 +14,10 @@ const pass = nconf.get('mongoPass');
 const host = nconf.get('mongoHost');
 const port = nconf.get('mongoPort');
 const dbName = nconf.get('mongoDatabase');
-let serverHost = "7f75b643.ngrok.io";
+let serverHost = "6a225d68.ngrok.io";
 if(process.env.PORT){//if webhook and app is runnig on heroku..
-  serverHost = "maker-lab.herokuapp.com";
+  serverHost = "shopbot-server.herokuapp.com";
 }
-
-let userSchema = {
-    "_id": "",
-    "first_name": "",
-    "last_name": "",
-    "password": "",
-    "role": {
-        "customer": false
-    },
-    "cart": [],
-    "buy_history_product": [],
-    "buckets_created": {},
-    "address": {},
-    "products_id_search_history": []
-};
 
 let uri = `mongodb://${user}:${pass}@${host}:${port}`;
 if (nconf.get('mongoDatabase')) {
@@ -67,22 +52,38 @@ var server = app.listen(process.env.PORT || 3000, function() {
 console.log('API server listening on port: 3000 or ', process.env.PORT)
 })
 
-app.post('/makerLab', function (req, res){
+app.post('/shopbotServer', function (req, res){
+//   let response = "This is a sample response from your webhook!";//Default response from the webhook to show it’s working
+// let responseObj={
+//      "fulfillmentText":response
+//     ,"fulfillmentMessages":[
+//         {
+//             "text": {
+//                 "text": [
+//                     "Hello I m Responding to intent"
+//                 ]
+//             }
+//         }
+//     ]
+//     ,"source":""
+// }
+// return res.json(responseObj);
+// })
+// app.post('/shopbotServer11', function (req, res){
   // let city = req.body.result.parameters['geo-city']; // city is a required param
-  const intentName = req.body.result.metadata['intentName'],
-        contexts = req.body.result.contexts ? req.body.result.contexts : [],
-        list_type = req.body.result.parameters['list'],
-        nthProduct = req.body.result.parameters['nthProduct'],
-        noOfProducts = req.body.result.parameters['noOfProducts'] ? req.body.result.parameters['noOfProducts'] : "1";
+  const intentName = req.body.queryResult.intent['displayName'],
+        contexts = req.body.queryResult.outputContexts ? req.body.queryResult.outputContexts : [],
+        list_type = req.body.queryResult.parameters['list'],
+        nthProduct = req.body.queryResult.parameters['nthProduct'],
+        noOfProducts = req.body.queryResult.parameters['noOfProducts'] ? req.body.queryResult.parameters['noOfProducts'] : "1";
   let msg = "", contextsObject = {};
   contexts.map(context => {
     return contextsObject[context.name] = context;
   })
-  console.log("Webhook POST /makerLab ----->>> \n\t\tIntent Called -> [", intentName, "]. \n\t\tcontextsObject : " , contextsObject);
+  console.log("Webhook POST /shopbotServer ----->>> \n\t\tIntent Called -> [", intentName, "]. \n\t\tcontextsObject : " , contextsObject);
   console.log("Request body : ", req.body);
   switch(intentName){
-    case "type-list":
-        if(list_type == "products"){
+    case "product-list":
           callProducts().then((output) => {
             // Return the results of the weather API to Dialogflow
             let msg = "Products List :\n";
@@ -132,22 +133,95 @@ app.post('/makerLab', function (req, res){
             })
             res.setHeader('Content-Type', 'application/json');
             //done send data more than 640bytes(i think) else googlle assistent crash..
-            res.send(JSON.stringify({ 'speech': msg, 'displayText': msg, 'contextOut': contextOut,
-                                    "messages": [
-                                      {
-                                        "items": items_card,
-                                        "platform": "google",
-                                        "type": "carousel_card"
-                                      }
-                                    ]
-                                 }));
+            // res.send(JSON.stringify({ 'speech': msg, 'displayText': msg, 'contextOut': contextOut,
+            //                         "messages": [
+            //                           {
+            //                             "items": items_card,
+            //                             "platform": "google",
+            //                             "type": "carousel_card"
+            //                           }
+            //                         ]
+            //                      }));
+            let response = "This is a sample response from your webhook!";//Default response from the webhook to show it’s working
+            let responseObj={
+                 "fulfillmentText":response
+                ,"fulfillmentMessages":[
+                    {
+                        "text": {
+                            "text": [
+                                "Hello I m Responding to intent"
+                            ]
+                        }
+                    }
+                ]
+                ,"source":""
+            }
+            return res.json(responseObj
+              // JSON.stringify(
+              // {//'speech': msg, 'displayText': msg,
+              // "speech": "product list here", "displayText": "product list here",
+              //   "fulfillmentText": "This is a text response",
+              //   "fulfillmentMessages": [
+              //     {
+              //       "card": {
+              //         "title": "card title",
+              //         "subtitle": "card text",
+              //         "imageUri": "https://assistant.google.com/static/images/molecule/Molecule-Formation-stop.png",
+              //         "buttons": [
+              //           {
+              //             "text": "button text",
+              //             "postback": "https://assistant.google.com/"
+              //           }
+              //         ]
+              //       }
+              //     }
+              //   ],
+              //   "source": "example.com",
+              //   "payload": {
+              //     "google": {
+              //       "expectUserResponse": true,
+              //       "richResponse": {
+              //         "items": [
+              //           {
+              //             "simpleResponse": {
+              //               "textToSpeech": "this is a simple response"
+              //             }
+              //           }
+              //         ]
+              //       }
+              //     },
+              //     "facebook": {
+              //       "text": "Hello, Facebook!"
+              //     },
+              //     "slack": {
+              //       "text": "This is a text response for Slack."
+              //     }
+              //   },
+              //   "outputContexts": [
+              //     {
+              //       "name": "projects/${PROJECT_ID}/agent/sessions/${SESSION_ID}/contexts/context name",
+              //       "lifespanCount": 5,
+              //       "parameters": {
+              //         "param": "param value"
+              //       }
+              //     }
+              //   ],
+              //   "followupEventInput": {
+              //     // "name": "event name",
+              //     // "languageCode": "en-US",
+              //     // "parameters": {
+              //     //   "param": "param value"
+              //     // }
+              //   }
+              // }
+            // )
+            )
 
         }).catch((error) => {
             // If there is an error let the user know
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
           });
-        }
         break
     default:
       //nonr intents find...
