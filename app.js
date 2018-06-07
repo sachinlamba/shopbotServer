@@ -14,7 +14,7 @@ const pass = nconf.get('mongoPass');
 const host = nconf.get('mongoHost');
 const port = nconf.get('mongoPort');
 const dbName = nconf.get('mongoDatabase');
-let serverHost = "445ff724.ngrok.io";
+let serverHost = "3b2f4e6e.ngrok.io";
 if(process.env.PORT){//if webhook and app is runnig on heroku..
   serverHost = "shopbot-server.herokuapp.com";
 }
@@ -43,6 +43,25 @@ app.post('/list_products', function (req, res) {
         console.log("products from /productsList",products)
         mongoclient.close();
         res.json(products);
+        res.end();
+     });
+    });
+})
+
+// This responds a POST request for the /view_product page.
+app.post('/view_product', function (req, res) {
+   console.log("Got a POST request for the /view_product for EAN->", req.body);
+   mongodb.MongoClient.connect(uri, (err, mongoclient) => {
+     if (err) {
+       throw err;
+     }
+     var db = mongoclient.db(dbName);
+     let EanObject = req.body;
+     db.collection('productsDataset').find(EanObject).toArray(function(err, items) {
+        let product = [...items].length ? [...items][0] : {};
+        console.log("product from /view_product",product)
+        mongoclient.close();
+        res.json(product);
         res.end();
      });
     });
@@ -110,7 +129,8 @@ app.post('/shopbotServer', function (req, res){
               "name": "products_ean_list",
               "lifespanCount": 10,
               "parameters": {
-                "EANList": products_ean_list
+                "EANList": products_ean_list,
+                "EANList.original": products_ean_list
               }
             })
 
@@ -127,7 +147,7 @@ app.post('/shopbotServer', function (req, res){
             //                      }));
             let response = "Here we have some tranding products: ";//Default response from the webhook to show it’s working
             let responseObj={
-                 "fulfillmentText":response, 'outputContexts': contextOut,
+                 "fulfillmentText":response,
                  "fulfillmentMessages":[
                     {
                       "platform": "ACTIONS_ON_GOOGLE",
@@ -143,7 +163,7 @@ app.post('/shopbotServer', function (req, res){
                         }
                     }
                 ]
-                ,"source":""
+                ,"source":"",// 'outputContexts': contextOut
                   // "payload": {
                   //   "google": {
                   //     "expectUserResponse": true,
@@ -167,6 +187,105 @@ app.post('/shopbotServer', function (req, res){
             res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
           });
         break
+    case "product details":
+        console.log("In Intent - product details", contextsObject.products_ean_list);
+        let msg = ""
+        if(contextsObject.products_ean_list && contextsObject.products_ean_list.parameters && contextsObject.products_ean_list.parameters.EANList != ""){
+          // msg = "Logout successfully";
+          let EANNumber = contextsObject.products_ean_list.parameters.EANList[nthProduct-1]
+          if(!isNaN(parseFloat(EANNumber)) && isFinite(EANNumber)){
+            viewProduct(EANNumber).then((output) => {
+              // Return the results of the weather API to Dialogflow
+              console.log("product list by help of EANNumber -> ", output, typeof output)
+              output = JSON.parse(output);
+              let msg = "Product Details: \n Name: " + output.Title + "\n" +
+                  "Price : " + output.ListPrice + "\n" +
+                  "Features : " + output.Feature + "\n" +
+                  "Item Dimensions: " + output.ItemDimensions + "\n" +
+                  "ReleaseDate: " + output.ReleaseDate + ".\n";
+              res.setHeader('Content-Type', 'application/json');
+              let contextOut = contexts ? contexts : [];
+              contextOut.push({
+                                "name": "active_product",
+                                "lifespan": 10,
+                                "parameters": {
+                                  "EANNumber": EANNumber
+                                }
+                              });
+              res.send(JSON.stringify({ 'speech': msg, 'displayText': msg,
+                                contextOut: contextOut,
+                                data: {
+                                          "google": {
+                                              "expect_user_response": true,
+                                              "rich_response": {
+                                                "items": [
+                                                    {
+                                                      "simpleResponse": {
+                                                        "textToSpeech": msg,
+                                                        "displayText": msg
+                                                      }
+                                                    }
+                                                ],
+                                                "suggestions":
+                                                  [
+                                                    {"title": "Go back to list?"},
+                                                    {"title": "Add to cart."},
+                                                    {"title": "logout"}
+                                                  ]
+                                            }
+                                          }
+                                      }
+                                    }));
+            }).catch((error) => {
+              // If there is an error let the user know
+              res.setHeader('Content-Type', 'application/json');
+              res.json({
+                "fulfillmentText":error,
+                "fulfillmentMessages":[
+                   {
+                       "text": {
+                           "text": [
+                               error
+                           ]
+                       }
+                   }
+                 ]
+              });
+            });
+          }else{
+            res.setHeader('Content-Type', 'application/json');
+            msg = "Plz select a valid product number from list only."
+            res.json({
+              "fulfillmentText":msg,
+              "fulfillmentMessages":[
+                 {
+                     "text": {
+                         "text": [
+                             msg
+                         ]
+                     }
+                 }
+               ]
+            });
+          }
+        }else{
+          res.setHeader('Content-Type', 'application/json');
+          msg = "Not able to find specified Product from last searched list of products.Say again like - 'open product second'.";
+          let responseObj={
+               "fulfillmentText":msg,
+               "fulfillmentMessages":[
+                  {
+                      "text": {
+                          "text": [
+                              msg
+                          ]
+                      }
+                  }
+              ]
+          }
+          res.json(responseObj);
+        }
+        break;
     default:
       //nonr intents find...
       res.setHeader('Content-Type', 'application/json');
@@ -175,6 +294,30 @@ app.post('/shopbotServer', function (req, res){
   }
 
 })
+
+
+function viewProduct (EANNumber) {
+  return new Promise((resolve, reject) => {
+    let path = '/view_product';
+    console.log("view product", typeof request, typeof http.request, "https://" + serverHost + path);
+    console.log("1");
+    request({
+              url: "https://" + serverHost + path,
+              method: "POST",
+              json: true,   // <--Very important!!!
+              body: {"EAN": EANNumber}
+            }, function (error, response, body){
+              if (!error && response.statusCode == 200) {
+                  console.log("success post request for view product: ",body)
+                  resolve(JSON.stringify(body));
+              }else{
+                console.error("dfg",error);
+                reject(error)
+              }
+            }
+          );
+  });
+}
 
 function callProducts (filtersObject) {
   return new Promise((resolve, reject) => {
