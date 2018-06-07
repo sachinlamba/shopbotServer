@@ -14,7 +14,7 @@ const pass = nconf.get('mongoPass');
 const host = nconf.get('mongoHost');
 const port = nconf.get('mongoPort');
 const dbName = nconf.get('mongoDatabase');
-let serverHost = "3b2f4e6e.ngrok.io";
+let serverHost = "105621f4.ngrok.io";
 if(process.env.PORT){//if webhook and app is runnig on heroku..
   serverHost = "shopbot-server.herokuapp.com";
 }
@@ -216,48 +216,58 @@ app.post('/shopbotServer', function (req, res){
                               });
             let response = msg; //Default response from the webhook to show it’s working
             let responseObj={
-                 "fulfillmentText":response,
+                 "fulfillmentText":"Here is th details of ur selected products.",
                  "fulfillmentMessages":[
                    {
-                       "text": {
-                           "text": [
-                               response
-                           ]
-                       }
-                   },
-                   {
                       "platform": "ACTIONS_ON_GOOGLE",
-                      "basicCard": {
-                        "title": output.Title,
-                        "subtitle": "Relsease : " + output.ReleaseDate,
-                        "formattedText": msg,
-                        "image": {
-                          "imageUri": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQp8gXe_NmrNfEgvr0aVlZvFjGO3pZ_jPeGclzZGVhK4-eIGYj",
-                          "accessibilityText": "Sample Image"
-                        },
-                        "buttons": [
+                      "simpleResponses": {
+                        "simpleResponses": [
                           {
-                            "title": "Open on website",
-                            "openUriAction": {
-                              "uri": "g"
-                            }
+                            "textToSpeech": "Here is th details of ur selected products."
                           }
                         ]
                       }
                     },
-                    {
-                      "platform": "ACTIONS_ON_GOOGLE",
-                      "suggestions": {
-                        "suggestions": [
-                          {
-                            "title": "back to list"
-                          },
-                          {
-                            "title": "Add this to my cart"
+                   {
+                       "text": {
+                           "text": [
+                               "Here is th details of ur selected products."
+                           ]
+                       }
+                   },
+                   {
+                    "platform": "ACTIONS_ON_GOOGLE",
+                    "basicCard": {
+                      "title": output.Title,
+                      "subtitle": "Relsease : " + output.ReleaseDate,
+                      "formattedText": msg,
+                      "image": {
+                        "imageUri": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQp8gXe_NmrNfEgvr0aVlZvFjGO3pZ_jPeGclzZGVhK4-eIGYj",
+                        "accessibilityText": "Sample Image"
+                      },
+                      "buttons": [
+                        {
+                          "title": "Open on website",
+                          "openUriAction": {
+                            "uri": "http://amazon.com"
                           }
-                        ]
-                      }
+                        }
+                      ]
                     }
+                  },
+                  {
+                    "platform": "ACTIONS_ON_GOOGLE",
+                    "suggestions": {
+                      "suggestions": [
+                        {
+                          "title": "back to list"
+                        },
+                        {
+                          "title": "Add this to my cart"
+                        }
+                      ]
+                    }
+                  }
                 ]
                 ,"source":"", 'outputContexts': contextOut,
                 // "suggestions":
