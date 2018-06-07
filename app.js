@@ -94,8 +94,8 @@ app.post('/shopbotServer', function (req, res){
                     "title": product.Title,
                     "description": "Price: "+ product.ListPrice,
                     "image": {
-                      "imageUri": "http:example.com",
-                      "accessibilityText": "example"
+                      "imageUri": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQp8gXe_NmrNfEgvr0aVlZvFjGO3pZ_jPeGclzZGVhK4-eIGYj",
+                      "accessibilityText": "Sample Image URL attahced."
                       // "imageUri": product.image_url,
                       // "accessibilityText": "product from category - " + product.category
                     }
