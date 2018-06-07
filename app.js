@@ -180,10 +180,10 @@ function callProducts (filtersObject) {
   return new Promise((resolve, reject) => {
     let path = '/list_products';
     request({
-              url: "https://products-service.cfapps.io/products/0",
-              method: "GET",
-              json: true//,   // <--Very important!!!
-              //body: filtersObject
+              url: "https://" + serverHost + path,
+              method: "POST",
+              json: true,   // <--Very important!!!
+              body: filtersObject
             }, function (error, response, body){
               if (!error && response.statusCode == 200) {
                 let response = JSON.stringify(body);
@@ -197,3 +197,25 @@ function callProducts (filtersObject) {
           );
   });
 }
+
+// function callProducts (filtersObject) {
+//   return new Promise((resolve, reject) => {
+//     let path = '/list_products';
+//     request({
+//               url: "https://products-service.cfapps.io/products/0",
+//               method: "GET",
+//               json: true//,   // <--Very important!!!
+//               //body: filtersObject
+//             }, function (error, response, body){
+//               if (!error && response.statusCode == 200) {
+//                 let response = JSON.stringify(body);
+//                 let output = `Product list in MongoDB mLab in cmd : ${response}`;
+//                 resolve(response);
+//               }else{
+//                 console.error("view products error -> ",error);
+//                 reject(error)
+//               }
+//             }
+//           );
+//   });
+// }
