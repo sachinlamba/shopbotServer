@@ -219,6 +219,13 @@ app.post('/shopbotServer', function (req, res){
                  "fulfillmentText":response,
                  "fulfillmentMessages":[
                    {
+                       "text": {
+                           "text": [
+                               response
+                           ]
+                       }
+                   },
+                   {
                       "platform": "ACTIONS_ON_GOOGLE",
                       "basicCard": {
                         "title": output.Title,
@@ -230,7 +237,7 @@ app.post('/shopbotServer', function (req, res){
                         },
                         "buttons": [
                           {
-                            "title": "f",
+                            "title": "Open on website",
                             "openUriAction": {
                               "uri": "g"
                             }
@@ -250,13 +257,6 @@ app.post('/shopbotServer', function (req, res){
                           }
                         ]
                       }
-                    },
-                    {
-                        "text": {
-                            "text": [
-                                response
-                            ]
-                        }
                     }
                 ]
                 ,"source":"", 'outputContexts': contextOut,
