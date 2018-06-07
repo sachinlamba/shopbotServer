@@ -108,7 +108,7 @@ app.post('/shopbotServer', function (req, res){
             contextOut = contexts;
             contextOut.push({
               "name": "products_ean_list",
-              "lifespan": 10,
+              "lifespanCount": 10,
               "parameters": {
                 "EANList": products_ean_list
               }
