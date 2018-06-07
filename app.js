@@ -127,7 +127,7 @@ app.post('/shopbotServer', function (req, res){
             //                      }));
             let response = "Here we have some tranding products: ";//Default response from the webhook to show it’s working
             let responseObj={
-                 "fulfillmentText":response,'contextOut': contextOut,
+                 "fulfillmentText":response,//'contextOut': contextOut,
                  "fulfillmentMessages":[
                     {
                       "platform": "ACTIONS_ON_GOOGLE",
