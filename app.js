@@ -181,7 +181,7 @@ function callProducts (filtersObject) {
     let path = '/list_products';
     request({
               url: "https://products-service.cfapps.io/products/0",
-              method: "POST",
+              method: "GET",
               json: true//,   // <--Very important!!!
               //body: filtersObject
             }, function (error, response, body){
