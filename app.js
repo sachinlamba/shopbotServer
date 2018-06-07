@@ -80,7 +80,9 @@ app.post('/shopbotServer', function (req, res){
         noOfProducts = req.body.queryResult.parameters['noOfProducts'] ? req.body.queryResult.parameters['noOfProducts'] : "1";
   let msg = "", contextsObject = {};
   contexts.map(context => {
-    return contextsObject[context.name] = context;
+    let contextName = context.name,
+      name = contextName.split("/")[contextName.split("/").length - 1]
+    return contextsObject[name] = context;
   })
   console.log("Webhook POST /shopbotServer ----->>> \n\t\tIntent Called -> [", intentName, "]. \n\t\tcontextsObject : " , contextsObject);
   console.log("Request body : ", req.body);
@@ -126,7 +128,7 @@ app.post('/shopbotServer', function (req, res){
             console.log("msg and google card1232->", msg, items_card, contexts);
             contextOut = contexts;
             contextOut.push({
-              "name": "products_ean_list",
+              "name": "projects/${PROJECT_ID}/agent/sessions/${SESSION_ID}/contexts/products_ean_list",
               "lifespanCount": 10,
               "parameters": {
                 "EANList": products_ean_list,
@@ -163,7 +165,7 @@ app.post('/shopbotServer', function (req, res){
                         }
                     }
                 ]
-                ,"source":"",// 'outputContexts': contextOut
+                ,"source":"", 'outputContexts': contextOut
                   // "payload": {
                   //   "google": {
                   //     "expectUserResponse": true,
@@ -206,36 +208,67 @@ app.post('/shopbotServer', function (req, res){
               res.setHeader('Content-Type', 'application/json');
               let contextOut = contexts ? contexts : [];
               contextOut.push({
-                                "name": "active_product",
-                                "lifespan": 10,
+                                "name": "projects/${PROJECT_ID}/agent/sessions/${SESSION_ID}/contexts/active_product",
+                                "lifespanCount": 10,
                                 "parameters": {
                                   "EANNumber": EANNumber
                                 }
                               });
-              res.send(JSON.stringify({ 'speech': msg, 'displayText': msg,
-                                contextOut: contextOut,
-                                data: {
-                                          "google": {
-                                              "expect_user_response": true,
-                                              "rich_response": {
-                                                "items": [
-                                                    {
-                                                      "simpleResponse": {
-                                                        "textToSpeech": msg,
-                                                        "displayText": msg
-                                                      }
-                                                    }
-                                                ],
-                                                "suggestions":
-                                                  [
-                                                    {"title": "Go back to list?"},
-                                                    {"title": "Add to cart."},
-                                                    {"title": "logout"}
-                                                  ]
-                                            }
-                                          }
-                                      }
-                                    }));
+            let response = msg; //Default response from the webhook to show it’s working
+            let responseObj={
+                 "fulfillmentText":response,
+                 "fulfillmentMessages":[
+                   {
+                      "platform": "ACTIONS_ON_GOOGLE",
+                      "basicCard": {
+                        "title": output.Title,
+                        "subtitle": "Relsease : " + output.ReleaseDate,
+                        "formattedText": msg,
+                        "image": {
+                          "imageUri": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQp8gXe_NmrNfEgvr0aVlZvFjGO3pZ_jPeGclzZGVhK4-eIGYj",
+                          "accessibilityText": "Sample Image"
+                        },
+                        "buttons": [
+                          {
+                            "title": "f",
+                            "openUriAction": {
+                              "uri": "g"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "platform": "ACTIONS_ON_GOOGLE",
+                      "suggestions": {
+                        "suggestions": [
+                          {
+                            "title": "back to list"
+                          },
+                          {
+                            "title": "Add this to my cart"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                        "text": {
+                            "text": [
+                                response
+                            ]
+                        }
+                    }
+                ]
+                ,"source":"", 'outputContexts': contextOut,
+                // "suggestions":
+                //   [
+                //     {"title": "Go back to list?"},
+                //     {"title": "Add to cart."},
+                //     {"title": "logout"}
+                //   ]
+              }
+              res.json(responseObj);
+
             }).catch((error) => {
               // If there is an error let the user know
               res.setHeader('Content-Type', 'application/json');
