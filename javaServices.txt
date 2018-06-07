@@ -1,0 +1,58 @@
+#by Nawaz
+
+Product service:
+
+1. For the view of all products ( first five products displayed based on ID )
+
+GET : https://products-service.cfapps.io/products/0 
+
+0 - is the page number
+
+2. For the view of one product 
+
+GET : https://products-service.cfapps.io/product/{productId}
+
+3. For the products after applying filter:
+
+POST : https://products-service.cfapps.io/products
+
+i/p filter params can be any of the below paarams:
+
+{
+"name": "shirt",
+"brand": ["scullers"],
+"size": ["Medium"],
+"category": ["Mens"],
+"color": ["green"]
+}
+
+
+Cart Service:
+
+1. To view the cart products of user
+
+GET : https://carts-service.cfapps.io/cart/{username}
+
+2. Add item to cart :
+
+POST : https://carts-service.cfapps.io/cart
+
+payload:
+ 
+ {
+ 	"userId" : "syed"
+ 	"userSelectedProducts" : [{
+ 		"productId" : "131",
+ 		"productName" : "shirt",
+ 		"productQuantity" : 1,
+ 		"productCost" : 500
+ 	}],
+ 	"totalCartAmount" : 1000
+ }
+ 
+ 3. remove the product from cart : 
+ 
+ DELETE : https://carts-service.cfapps.io/cart/{userId}/{productId}
+ 
+ 
+
