@@ -14,7 +14,7 @@ const pass = nconf.get('mongoPass');
 const host = nconf.get('mongoHost');
 const port = nconf.get('mongoPort');
 const dbName = nconf.get('mongoDatabase');
-let serverHost = "105621f4.ngrok.io";
+let serverHost = "c690df0b.ngrok.io";
 if(process.env.PORT){//if webhook and app is runnig on heroku..
   serverHost = "shopbot-server.herokuapp.com";
 }
@@ -114,6 +114,50 @@ app.post('/shopbotServer', function (req, res){
   })
   console.log("Webhook POST /shopbotServer ----->>> \n\t\tIntent Called -> [", intentName, "]. \n\t\tcontextsObject : " , contextsObject);
   console.log("Request body : ", req.body);
+  console.log("Request body originalDetectIntentRequest: ", req.body.originalDetectIntentRequest.payload, req.body.originalDetectIntentRequest.payload.user);
+  if(req.body.originalDetectIntentRequest && req.body.originalDetectIntentRequest.payload && req.body.originalDetectIntentRequest.payload.user){
+    console.log("Request body user: ", req.body.originalDetectIntentRequest.payload.user.accessToken);
+    console.log("string ", JSON.stringify(req.body.originalDetectIntentRequest.payload));
+    let linkAccess = "https://www.googleapis.com/oauth2/v1/userinfo?access_token="+req.body.originalDetectIntentRequest.payload.user.accessToken;
+    linkAccess += "&userId=" + req.body.originalDetectIntentRequest.payload.user.userId;
+    return new Promise(resolve => {
+        request({url: linkAccess, method: "GET", json: true},(error, response, body) => {
+          console.log("response -> ", response, body);
+            if (!error && response.statusCode === 200) {
+                let data = JSON.parse(body);
+                let name = data.given_name ? data.given_name : '';
+                console.log("user details", data, name);
+                // conv.ask(new SimpleResponse({
+                //     speech: "Hello "+ name + "!",
+                //     text: "Hello "+ name + "!"
+                // }));
+                resolve();
+            } else {
+                console.log("Error in request promise while trying to fetch email: ",error);
+                resolve();
+            }
+        })
+    })
+    // new Promise((resolve, reject) => {
+    //   let path = '/list_products';
+    //   request({
+    //             url: "https://" + serverHost + path,
+    //             method: "POST",
+    //             json: true,   // <--Very important!!!
+    //             body: filtersObject
+    //           }, function (error, response, body){
+    //             if (!error && response.statusCode == 200) {
+    //               let response = JSON.stringify(body);
+    //               let output = `Product list in MongoDB mLab in cmd : ${response}`;
+    //               resolve(response);
+    //             }else{
+    //               console.error("view products error -> ",error);
+    //               reject(error)
+    //             }
+    //           }
+    //         );
+    // });
+  }
   switch(intentName){
     case "product2Cart":
         console.log("In Intent - product2Cart", contextsObject.login , contextsObject.products_ean_list);
