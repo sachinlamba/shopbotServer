@@ -128,27 +128,37 @@ app.post('/shopbotServer', function (req, res){
           }else{
             let msg = "Plz view details of product or tell valid index of product(searched list) to add item to your cart.";
             res.setHeader('Content-Type', 'application/json');
-            res.send(JSON.stringify({ 'speech': msg, 'displayText': msg,
-                              data: {
-                                        "google": {
-                                            "expect_user_response": true,
-                                            "rich_response": {
-                                              "items": [
-                                                  {
-                                                    "simpleResponse": {
-                                                      "textToSpeech": msg,
-                                                      "displayText": msg
-                                                    }
-                                                  }
-                                              ],
-                                              "suggestions":
-                                                [
-                                                  {"title": "You can search our Products without login too."}
-                                                ]
-                                          }
-                                        }
-                                    }
-                                  }));
+            res.json({
+                 "fulfillmentText":msg,
+                 "fulfillmentMessages":[
+                   {
+                      "platform": "ACTIONS_ON_GOOGLE",
+                      "simpleResponses": {
+                        "simpleResponses": [
+                          {
+                            "textToSpeech": msg
+                          }
+                        ]
+                      }
+                    },
+                   {
+                       "text": {
+                           "text": [
+                               msg
+                           ]
+                       }
+                   },
+                  {
+                    "platform": "ACTIONS_ON_GOOGLE",
+                    "suggestions": {
+                      "suggestions": [
+                        {"title": "You can search our Products without login too."}
+                      ]
+                    }
+                  }
+                ]
+                ,"source":"", 'outputContexts': contextOut
+              })
           }
           if(!isNaN(parseFloat(EANNumber)) && isFinite(EANNumber)){
             let userObject = {
@@ -163,63 +173,105 @@ app.post('/shopbotServer', function (req, res){
               output = JSON.parse(output);
               let msg = "Product (EAN number) added successfully. ";
               res.setHeader('Content-Type', 'application/json');
-              res.send(JSON.stringify({ 'speech': msg, 'displayText': msg,
-                                data: {
-                                          "google": {
-                                              "expect_user_response": true,
-                                              "rich_response": {
-                                                "items": [
-                                                    {
-                                                      "simpleResponse": {
-                                                        "textToSpeech": msg,
-                                                        "displayText": msg
-                                                      }
-                                                    }
-                                                ],
-                                                "suggestions":
-                                                  [
-                                                    {"title": "Go back to list?"},
-                                                    {"title": "Add to cart."},
-                                                    {"title": "logout"}
-                                                  ]
-                                            }
-                                          }
-                                      }
-                                    }));
+              res.json({
+                   "fulfillmentText":msg,
+                   "fulfillmentMessages":[
+                     {
+                        "platform": "ACTIONS_ON_GOOGLE",
+                        "simpleResponses": {
+                          "simpleResponses": [
+                            {
+                              "textToSpeech": msg
+                            }
+                          ]
+                        }
+                      },
+                     {
+                         "text": {
+                             "text": [
+                                 msg
+                             ]
+                         }
+                     },
+                    {
+                      "platform": "ACTIONS_ON_GOOGLE",
+                      "suggestions": {
+                        "suggestions": [
+                          {"title": "Go back to list?"},
+                          {"title": "Add to cart."},
+                          {"title": "logout"}
+                        ]
+                      }
+                    }
+                  ]
+                  ,"source":"", 'outputContexts': contextOut
+                })
             }).catch((error) => {
               // If there is an error let the user know
               res.setHeader('Content-Type', 'application/json');
-              res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+              res.json({
+                "fulfillmentText":error,
+                "fulfillmentMessages":[
+                   {
+                       "text": {
+                           "text": [
+                               error
+                           ]
+                       }
+                   }
+                 ]
+              });
             });
           }else{
             let msg = "Not able to find a valid productId. Plz try again from a list of products."
             res.setHeader('Content-Type', 'application/json');
-            res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+            res.json({
+              "fulfillmentText":error,
+              "fulfillmentMessages":[
+                 {
+                     "text": {
+                         "text": [
+                             error
+                         ]
+                     }
+                 }
+               ]
+            });
           }
         }else{
           let msg = "Plz login to add products to your cart.";
           res.setHeader('Content-Type', 'application/json');
-          res.send(JSON.stringify({ 'speech': msg, 'displayText': msg,
-                            data: {
-                                      "google": {
-                                          "expect_user_response": true,
-                                          "rich_response": {
-                                            "items": [
-                                                {
-                                                  "simpleResponse": {
-                                                    "textToSpeech": msg,
-                                                    "displayText": msg
-                                                  }
-                                                }
-                                            ],
-                                            "suggestions":
-                                              [
-                                                {"title": "You can search our Products without login too."}
-                                              ]
-                                        }
-                                      }
-                                  }
-                                }));
+          res.json({
+               "fulfillmentText":msg,
+               "fulfillmentMessages":[
+                 {
+                    "platform": "ACTIONS_ON_GOOGLE",
+                    "simpleResponses": {
+                      "simpleResponses": [
+                        {
+                          "textToSpeech": msg
+                        }
+                      ]
+                    }
+                  },
+                 {
+                     "text": {
+                         "text": [
+                             msg
+                         ]
+                     }
+                 },
+                {
+                  "platform": "ACTIONS_ON_GOOGLE",
+                  "suggestions": {
+                    "suggestions": [
+                      {"title": "You can search our Products without login too."}
+                    ]
+                  }
+                }
+              ]
+              ,"source":"", 'outputContexts': contextOut
+            })
         }
 
         break;
