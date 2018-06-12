@@ -67,6 +67,34 @@ app.post('/view_product', function (req, res) {
     });
 })
 
+app.post('/add_product', function (req, res) {
+   console.log("Got a POST request for the /add_product",JSON.stringify(req.body));
+   mongodb.MongoClient.connect(uri, (err, mongoclient) => {
+     if (err) {
+       throw err;
+     }
+     console.log("6")
+     var db = mongoclient.db(dbName);
+     console.log("user_update",JSON.stringify(req.body));
+     let update_user = req.body;
+     let search_user = { email_id: update_user.email_id};
+     console.log("search_user", search_user, "cart - ", update_user.productByEAN);
+     // res.json(update_user);
+     // res.end();
+     db.collection('users').findAndModify(
+       search_user,
+       [],
+       {$push: {cart: update_user.productByEAN }},
+       {},
+       function(err, update_user) {
+        console.log("user from /add_product",update_user)
+          mongoclient.close();
+          res.json(update_user);
+          res.end();
+     })
+    });
+})
+
 var server = app.listen(process.env.PORT || 3000, function() {
 console.log('API server listening on port: 3000 or ', process.env.PORT)
 })
@@ -87,6 +115,114 @@ app.post('/shopbotServer', function (req, res){
   console.log("Webhook POST /shopbotServer ----->>> \n\t\tIntent Called -> [", intentName, "]. \n\t\tcontextsObject : " , contextsObject);
   console.log("Request body : ", req.body);
   switch(intentName){
+    case "product2Cart":
+        console.log("In Intent - product2Cart", contextsObject.login , contextsObject.products_ean_list);
+        if(contextsObject.login && contextsObject.login.parameters && contextsObject.login.parameters.email_id != ""){
+          let EANNumber = "";
+          if(contextsObject["active_product"]){
+            //pick this if product details are shown
+            EANNumber = contextsObject["active_product"].parameters.EANNumber;
+          }else if(contextsObject.products_ean_list && !isNaN(parseFloat(nthProduct)) && isFinite(nthProduct)){
+            //;pick this if product number is told by user to add product to cart
+            EANNumber = contextsObject.products_ean_list.parameters.EANList[nthProduct-1]
+          }else{
+            let msg = "Plz view details of product or tell valid index of product(searched list) to add item to your cart.";
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify({ 'speech': msg, 'displayText': msg,
+                              data: {
+                                        "google": {
+                                            "expect_user_response": true,
+                                            "rich_response": {
+                                              "items": [
+                                                  {
+                                                    "simpleResponse": {
+                                                      "textToSpeech": msg,
+                                                      "displayText": msg
+                                                    }
+                                                  }
+                                              ],
+                                              "suggestions":
+                                                [
+                                                  {"title": "You can search our Products without login too."}
+                                                ]
+                                          }
+                                        }
+                                    }
+                                  }));
+          }
+          if(!isNaN(parseFloat(EANNumber)) && isFinite(EANNumber)){
+            let userObject = {
+              email_id : contextsObject.login.parameters.email_id,
+              productByEAN : {
+                [EANNumber] : noOfProducts
+              }
+            };
+            addProduct(userObject).then((output) => {
+              // Return the results of the weather API to Dialogflow
+              console.log("product list by help of EANNumber -> ", output, typeof output)
+              output = JSON.parse(output);
+              let msg = "Product (EAN number) added successfully. ";
+              res.setHeader('Content-Type', 'application/json');
+              res.send(JSON.stringify({ 'speech': msg, 'displayText': msg,
+                                data: {
+                                          "google": {
+                                              "expect_user_response": true,
+                                              "rich_response": {
+                                                "items": [
+                                                    {
+                                                      "simpleResponse": {
+                                                        "textToSpeech": msg,
+                                                        "displayText": msg
+                                                      }
+                                                    }
+                                                ],
+                                                "suggestions":
+                                                  [
+                                                    {"title": "Go back to list?"},
+                                                    {"title": "Add to cart."},
+                                                    {"title": "logout"}
+                                                  ]
+                                            }
+                                          }
+                                      }
+                                    }));
+            }).catch((error) => {
+              // If there is an error let the user know
+              res.setHeader('Content-Type', 'application/json');
+              res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+            });
+          }else{
+            let msg = "Not able to find a valid productId. Plz try again from a list of products."
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+          }
+        }else{
+          let msg = "Plz login to add products to your cart.";
+          res.setHeader('Content-Type', 'application/json');
+          res.send(JSON.stringify({ 'speech': msg, 'displayText': msg,
+                            data: {
+                                      "google": {
+                                          "expect_user_response": true,
+                                          "rich_response": {
+                                            "items": [
+                                                {
+                                                  "simpleResponse": {
+                                                    "textToSpeech": msg,
+                                                    "displayText": msg
+                                                  }
+                                                }
+                                            ],
+                                            "suggestions":
+                                              [
+                                                {"title": "You can search our Products without login too."}
+                                              ]
+                                        }
+                                      }
+                                  }
+                                }));
+        }
+
+        break;
     case "product-list":
           callProducts().then((output) => {
             // Return the results of the weather API to Dialogflow
@@ -355,6 +491,28 @@ function viewProduct (EANNumber) {
                   resolve(JSON.stringify(body));
               }else{
                 console.error("dfg",error);
+                reject(error)
+              }
+            }
+          );
+  });
+}
+
+function addProduct(productObject) {
+  return new Promise((resolve, reject) => {
+    let path = '/add_product';
+    console.log("2. add_product", typeof request, typeof http.request, "https://" + serverHost + path);
+    request({
+              url: "https://" + serverHost + path,
+              method: "POST",
+              json: true,   // <--Very important!!!
+              body: productObject
+            }, function (error, response, body){
+              if (!error && response.statusCode == 200) {
+                  console.log("success post request for add product to user cart: ",body)
+                  resolve(JSON.stringify(body));
+              }else{
+                console.error("3. add_product",error);
                 reject(error)
               }
             }
